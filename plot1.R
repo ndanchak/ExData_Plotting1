@@ -1,5 +1,6 @@
 getwd()
-setwd("d:/DataScienceSpecialization/ExploratoryDataAnalysis/Project")
+#set your working directory
+#setwd("d:/DataScienceSpecialization/ExploratoryDataAnalysis/Project")
 
 #File should be in a folder "DATA" in your working directory
 file <- ("DATA/household_power_consumption.txt")
