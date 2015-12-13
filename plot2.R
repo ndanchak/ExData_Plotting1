@@ -1,17 +1,13 @@
-getwd()
-#set your working directory
-#setwd("d:/DataScienceSpecialization/ExploratoryDataAnalysis/Project")
+temp <- tempfile()
+download.file("https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip",temp)
+data <- read.table(unz(temp, "household_power_consumption.txt"),header=TRUE,na.strings = "NA",sep = ";")
+unlink(temp)
 
-#File should be in a folder "DATA" in your working directory
-file <- ("DATA/household_power_consumption.txt")
+filtereddata <- data[(as.Date(data$Date, format = "%d/%m/%Y") == "2007-02-01" | as.Date(data$Date, format = "%d/%m/%Y") == "2007-02-02"),]
+filtereddata$Global_active_power <- as.numeric(as.character(filtereddata$Global_active_power))
 
-hh_pow_con_full <- read.delim(file, header = TRUE, sep = ";")
-
-hh_pow_con <- hh_pow_con_full[as.Date(hh_pow_con_full$Date,"%d/%m/%Y")=='2007-02-01' | as.Date(hh_pow_con_full$Date,"%d/%m/%Y")=='2007-02-02',]
-hh_pow_con$Date<-as.Date(hh_pow_con$Date,"%d/%m/%Y")
-hh_pow_con$Time<-strftime(strptime(hh_pow_con$Time,"%H:%M:%S"), format = "%H:%M:%S", usetz = FALSE)
-hh_pow_con$Global_active_power<-as.numeric(as.character(hh_pow_con$Global_active_power))
-png(filename="plot2.png")
-hh_pow_con$Day <- with(hh_pow_con, as.POSIXct(paste(Date, Time), format="%Y-%m-%d %H:%M:%S"))
-plot(hh_pow_con$Global_active_power ~ hh_pow_con$Day,type="l",ylab="Global Active Power (kilowatts)",xlab="")
+png(filename="plot1.png")
+hist(filtereddata$Global_active_power
+     ,xlab="Global Active Power (kilowatts)",col = "red",main="Global Active Power",breaks = 12)
 dev.off()
+
