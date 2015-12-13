@@ -1,32 +1,31 @@
-getwd()
-#set your working directory
-#setwd("d:/DataScienceSpecialization/ExploratoryDataAnalysis/Project")
+Sys.setlocale("LC_ALL", "English")
 
-#File should be in a folder "DATA" in your working directory
-file <- ("DATA/household_power_consumption.txt")
+temp <- tempfile()
+download.file("https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip",temp)
+data <- read.table(unz(temp, "household_power_consumption.txt"),header=TRUE,na.strings = "NA",sep = ";")
+unlink(temp)
 
-hh_pow_con_full <- read.delim(file, header = TRUE, sep = ";")
+filtereddata <- data[(as.Date(data$Date, format = "%d/%m/%Y") == "2007-02-01" | as.Date(data$Date, format = "%d/%m/%Y") == "2007-02-02"),]
+filtereddata$Date <- as.Date(filtereddata$Date, format = "%d/%m/%Y") 
+filtereddata$Global_active_power <- as.numeric(as.character(filtereddata$Global_active_power))
+filtereddata$Global_reactive_power <- as.numeric(as.character(filtereddata$Global_reactive_power))
+filtereddata$Voltage <- as.numeric(as.character(filtereddata$Voltage))
+filtereddata$Sub_metering_1 <- as.numeric(as.character(filtereddata$Sub_metering_1))
+filtereddata$Sub_metering_2 <- as.numeric(as.character(filtereddata$Sub_metering_2))
+filtereddata$Sub_metering_3 <- as.numeric(as.character(filtereddata$Sub_metering_3))
+filtereddata$DateTime <- with(filtereddata, as.POSIXct(paste(Date, Time), format="%Y-%m-%d %H:%M:%S", tz = "GMT"))
 
-hh_pow_con <- hh_pow_con_full[as.Date(hh_pow_con_full$Date,"%d/%m/%Y")=='2007-02-01' | as.Date(hh_pow_con_full$Date,"%d/%m/%Y")=='2007-02-02',]
-hh_pow_con$Date<-as.Date(hh_pow_con$Date,"%d/%m/%Y")
-hh_pow_con$Time<-strftime(strptime(hh_pow_con$Time,"%H:%M:%S"), format = "%H:%M:%S", usetz = FALSE)
-hh_pow_con$Global_active_power<-as.numeric(as.character(hh_pow_con$Global_active_power))
-hh_pow_con$Day <- with(hh_pow_con, as.POSIXct(paste(Date, Time), format="%Y-%m-%d %H:%M:%S"))
 
 png(filename="plot4.png")
-par(mfcol = c(2,2))
-#1
-plot(hh_pow_con$Global_active_power ~ hh_pow_con$Day,type="l",ylab="Global Active Power",xlab="")
-#2
-plot(as.numeric(as.character(hh_pow_con$Sub_metering_1)) ~ hh_pow_con$Day,type="n",ylab="Energy sub metering",xlab="")
-points(as.numeric(as.character(hh_pow_con$Sub_metering_1)) ~ hh_pow_con$Day,type="l")
-points(as.numeric(as.character(hh_pow_con$Sub_metering_2)) ~ hh_pow_con$Day,type="l",col="red")
-points(as.numeric(as.character(hh_pow_con$Sub_metering_3)) ~ hh_pow_con$Day,type="l",col="blue")
-legend("topright",legend=c("Sub_metering_1","Sub_metering_2","Sub_metering_3"),pch="-",col = c("black","red","blue"))
-#3
-plot(as.numeric(as.character(hh_pow_con$Voltage)) ~ hh_pow_con$Day,type="l",ylab="Voltage",xlab="datetime")
-
-#4
-plot(as.numeric(as.character(hh_pow_con$Global_reactive_power)) ~ hh_pow_con$Day,type="l",ylab="Global_reactive_powe",xlab="datetime")
-
+par(mfrow = c(2,2))
+with(filtereddata,plot(DateTime,Global_active_power, type = "l", ylab = "Global Active Power", xlab =" "))
+with(filtereddata,plot(DateTime,Voltage, type = "l", ylab = "Voltage", xlab="datetime"))
+with(filtereddata,{
+  plot(DateTime,Sub_metering_1, type = "l", ylab = "Energy sub metering", xlab =" ")
+  points(DateTime,Sub_metering_2, type='l', col="red")
+  points(DateTime,Sub_metering_3, type='l', col="blue")
+}
+)
+legend("topright", pch = "_", col = c("black","red","blue"), legend = c("Sub_metering_1","Sub_metering_2","Sub_metering_3"))
+with(filtereddata,plot(DateTime,Global_reactive_power, type = "l", ylab = "Global_reactive_power", xlab="datetime"))
 dev.off()
